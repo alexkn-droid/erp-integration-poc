@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Activity history{% endblock %}
+{% block content %}
+<h1>Activity history</h1>
+<p class="muted">Every create/update attempt this app has made against QuickBooks, and its outcome. Tokens and full API payloads are never stored here.</p>
+
+<div class="card">
+  {% if entries %}
+  <table>
+    <tr><th>Time</th><th>Action</th><th>Type</th><th>External ID</th><th>QBO ID</th><th>Outcome</th><th>Notes</th></tr>
+    {% for entry in entries %}
+    <tr>
+      <td>{{ entry.timestamp.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+      <td>{{ entry.action }}</td>
+      <td>{{ entry.entity_type }}</td>
+      <td>{{ entry.external_id }}</td>
+      <td>{{ entry.qbo_id or "—" }}</td>
+      <td>{{ entry.outcome }}</td>
+      <td class="muted">{{ entry.error_summary or "" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">No activity yet.</p>
+  {% endif %}
+</div>
+
+<div class="actions">
+  {% if page > 1 %}<a class="btn secondary" href="/activity?page={{ page - 1 }}">Newer</a>{% endif %}
+  {% if has_next %}<a class="btn secondary" href="/activity?page={{ page + 1 }}">Older</a>{% endif %}
+</div>
+{% endblock %}

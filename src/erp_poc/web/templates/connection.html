@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}QuickBooks connection{% endblock %}
+{% block content %}
+<h1>QuickBooks connection</h1>
+
+<div class="card">
+  {% if status.connected %}
+    <p><span class="status-pill status-connected">Connected</span></p>
+    <dl class="kv">
+      <dt>Company</dt><dd>{{ status.company_name or "(name not yet retrieved)" }}</dd>
+      <dt>Realm ID</dt><dd>{{ status.realm_id }}</dd>
+      <dt>Connected at</dt><dd>{{ status.connected_at }}</dd>
+      <dt>Health check</dt>
+      <dd>
+        {% if health and health.ok %}
+          <span class="status-pill status-connected">OK</span> — reached QuickBooks as "{{ health.company_name }}"
+        {% elif health %}
+          <span class="status-pill status-disconnected">Failing</span> — {{ health.message }}
+        {% else %}
+          <span class="muted">Not checked</span>
+        {% endif %}
+      </dd>
+    </dl>
+    <div class="actions">
+      <a class="btn" href="/connection/start">Reconnect QuickBooks</a>
+      <form method="post" action="/connection/disconnect">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="danger">Disconnect</button>
+      </form>
+    </div>
+  {% else %}
+    <p><span class="status-pill status-disconnected">Not connected</span></p>
+    <p class="muted">Connect the shared QuickBooks sandbox company to use the rest of this app.</p>
+    <div class="actions">
+      <a class="btn" href="/connection/start">Connect QuickBooks</a>
+    </div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>About this connection</h2>
+  <p class="muted">
+    This app supports exactly one active QuickBooks connection, shared by everyone who logs in.
+    Reconnecting replaces the previous connection. This is a sandbox-only prototype —
+    it will refuse to write to a non-sandbox company.
+  </p>
+</div>
+{% endblock %}

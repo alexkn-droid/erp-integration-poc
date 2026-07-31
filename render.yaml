@@ -1,0 +1,40 @@
+# Render Blueprint. In the Render dashboard: New -> Blueprint -> point at
+# this repo -> Render reads this file and provisions both services below.
+#
+# Secrets (marked sync: false) are NOT set here — Render will prompt for
+# them in its dashboard during the Blueprint setup, which is exactly where
+# they should be typed. See README.md "Deployment" for the full walkthrough
+# and docs/web_app_setup.md for how to obtain each value.
+services:
+  - type: web
+    name: erp-poc-web
+    runtime: python
+    plan: free
+    buildCommand: "pip install -e ."
+    startCommand: "alembic upgrade head && uvicorn erp_poc.web.asgi:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: QBO_CLIENT_ID
+        sync: false
+      - key: QBO_CLIENT_SECRET
+        sync: false
+      - key: QBO_ENVIRONMENT
+        value: sandbox
+      - key: QBO_REDIRECT_URI
+        sync: false # set to https://<your-service>.onrender.com/connection/callback after first deploy
+      - key: APP_SECRET_KEY
+        generateValue: true
+      - key: SHARED_PASSWORD_HASH
+        sync: false # generate with `python scripts/generate_secrets.py`, paste the hash here (never the plaintext password)
+      - key: DATABASE_URL
+        fromDatabase:
+          name: erp-poc-db
+          property: connectionString
+      - key: MAX_RETRIES
+        value: "5"
+      - key: RETRY_BASE_DELAY_SECONDS
+        value: "1.0"
+
+databases:
+  - name: erp-poc-db
+    plan: free
+    postgresMajorVersion: "16"

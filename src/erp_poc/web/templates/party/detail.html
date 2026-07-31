@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ party.display_name }}{% endblock %}
+{% block content %}
+<h1>{{ party.display_name }}</h1>
+
+<div class="card">
+  <dl class="kv">
+    <dt>QuickBooks ID</dt><dd>{{ party.erp_id }}</dd>
+    <dt>Sync token</dt><dd>{{ party.erp_sync_token }}</dd>
+    <dt>Company name</dt><dd>{{ party.company_name or "—" }}</dd>
+    <dt>Email</dt><dd>{{ party.email or "—" }}</dd>
+    <dt>Phone</dt><dd>{{ party.phone or "—" }}</dd>
+    <dt>Billing address</dt>
+    <dd>
+      {% if party.billing_address %}
+        {{ party.billing_address.line1 or "" }} {{ party.billing_address.line2 or "" }}<br>
+        {{ party.billing_address.city or "" }} {{ party.billing_address.state or "" }} {{ party.billing_address.postal_code or "" }}<br>
+        {{ party.billing_address.country or "" }}
+      {% else %}—{% endif %}
+    </dd>
+    <dt>Currency</dt><dd>{{ party.currency }}</dd>
+    <dt>Active</dt><dd>{{ "Yes" if party.is_active else "No" }}</dd>
+    <dt>Our external ID</dt><dd>{{ party.external_id }}</dd>
+  </dl>
+  <div class="actions">
+    <a class="btn" href="{{ url_prefix }}/{{ party.erp_id }}/edit">Edit</a>
+    <a class="btn secondary" href="{{ url_prefix }}">Back to {{ label.lower() }}s</a>
+  </div>
+</div>
+{% endblock %}

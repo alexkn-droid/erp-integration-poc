@@ -1,0 +1,4 @@
+external_id,display_name,company_name,email,phone,address_line1,address_line2,city,state,postal_code,country,currency,is_active
+,Acme Office Supply,Acme Office Supply Inc,orders@acme-supply.example,555-0201,500 Industrial Way,,Chicago,IL,60601,US,USD,true
+,Blue Sky Cleaning,,accounts@blueskyclean.example,555-0202,,,,,,,USD,true
+vend-external-003,Summit Freight Co,Summit Freight LLC,billing@summitfreight.example,555-0203,900 Dock Rd,Bay 3,Newark,NJ,07101,US,USD,true

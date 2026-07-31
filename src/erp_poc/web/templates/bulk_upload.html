@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Bulk upload{% endblock %}
+{% block content %}
+<h1>Bulk upload</h1>
+
+{% if error %}
+<div class="card" style="border-color:#f2c1bc"><p style="color:#b3261e">{{ error }}</p></div>
+{% endif %}
+
+<form method="post" action="/bulk-upload" enctype="multipart/form-data" class="stacked card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+  <label>Record type</label>
+  <div class="checkbox-row"><input type="radio" name="entity_type" value="customer" id="et_customer" checked><label for="et_customer" style="margin:0">Customers</label></div>
+  <div class="checkbox-row"><input type="radio" name="entity_type" value="vendor" id="et_vendor"><label for="et_vendor" style="margin:0">Vendors</label></div>
+
+  <label for="file">CSV file (up to {{ max_rows }} rows)</label>
+  <input type="file" id="file" name="file" accept=".csv,text/csv" required>
+
+  <div class="actions">
+    <button type="submit">Validate and preview</button>
+  </div>
+</form>
+
+<div class="card">
+  <h2 style="margin-top:0">Expected columns</h2>
+  <p class="muted">First row must be a header. <code>display_name</code> is the only required column. See <code>examples/customers.csv</code> and <code>examples/vendors.csv</code> in the repo for ready-to-edit templates.</p>
+  <p class="muted" style="word-break: break-all;">{{ columns | join(", ") }}</p>
+  <p class="muted"><code>is_active</code> accepts true/false, yes/no, or 1/0. If <code>external_id</code> is left blank, one is generated automatically.</p>
+</div>
+{% endblock %}

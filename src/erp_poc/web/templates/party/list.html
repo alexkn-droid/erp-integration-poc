@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ label }}s{% endblock %}
+{% block content %}
+<h1>{{ label }}s</h1>
+
+{% if connected == false %}
+<div class="card">
+  <p>QuickBooks is not connected. <a href="/connection">Connect it</a> to search {{ label.lower() }}s.</p>
+</div>
+{% else %}
+
+<form method="get" action="{{ url_prefix }}" class="card" style="display:flex; gap:10px; align-items:end;">
+  <div style="flex:1">
+    <label for="q" class="muted" style="display:block; font-size:13px; margin-bottom:4px;">Search by name</label>
+    <input type="text" id="q" name="q" value="{{ q }}" placeholder="Start typing a name…">
+  </div>
+  <button type="submit">Search</button>
+  <a class="btn secondary" href="{{ url_prefix }}/new">New {{ label.lower() }}</a>
+</form>
+
+<div class="card">
+  {% if results %}
+  <table>
+    <tr><th>Display name</th><th>Company</th><th>Email</th><th>QBO ID</th><th>Active</th><th></th></tr>
+    {% for r in results %}
+    <tr>
+      <td>{{ r.display_name }}</td>
+      <td>{{ r.company_name or "—" }}</td>
+      <td>{{ r.email or "—" }}</td>
+      <td>{{ r.erp_id }}</td>
+      <td>{{ "Yes" if r.is_active else "No" }}</td>
+      <td><a href="{{ url_prefix }}/{{ r.erp_id }}">View</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% elif q %}
+  <p class="muted">No {{ label.lower() }}s matched "{{ q }}".</p>
+  {% else %}
+  <p class="muted">Search for a {{ label.lower() }} by name, or browse the most recent {{ label.lower() }}s above.</p>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

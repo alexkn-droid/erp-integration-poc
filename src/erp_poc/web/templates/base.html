@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ERP Integration PoC{% endblock %} — ERP Integration PoC</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+{% if logged_in %}
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/">ERP Integration PoC <span class="badge">SANDBOX ONLY</span></a>
+    <nav>
+      <a href="/">Dashboard</a>
+      <a href="/customers">Customers</a>
+      <a href="/vendors">Vendors</a>
+      <a href="/bulk-upload">Bulk upload</a>
+      <a href="/activity">Activity</a>
+      <a href="/connection">QuickBooks connection</a>
+      <form method="post" action="/logout" class="logout-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="link-button">Logout</button>
+      </form>
+    </nav>
+  </div>
+</header>
+{% endif %}
+
+<main class="container">
+  {% if flash_message %}
+  <div class="flash flash-{{ flash_level }}">{{ flash_message }}</div>
+  {% endif %}
+  {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>

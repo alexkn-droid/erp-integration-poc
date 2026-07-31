@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Bulk upload results{% endblock %}
+{% block content %}
+<h1>Results: {{ job.filename }}</h1>
+
+<div class="card">
+  <p>
+    <strong>{{ counts.get("created", 0) }}</strong> created &nbsp;·&nbsp;
+    <strong>{{ counts.get("already_exists", 0) }}</strong> already existed &nbsp;·&nbsp;
+    <strong>{{ counts.get("failed", 0) }}</strong> failed
+  </p>
+  <div class="actions" style="margin-top:0">
+    <a class="btn" href="/bulk-upload/{{ job.id }}/download">Download results CSV</a>
+    <a class="btn secondary" href="/bulk-upload">Upload another file</a>
+  </div>
+</div>
+
+<div class="card">
+  <table>
+    <tr><th>Row</th><th>Display name</th><th>External ID</th><th>Outcome</th><th>QBO ID</th><th>Detail</th></tr>
+    {% for r in job.results_json %}
+    <tr>
+      <td>{{ r.row_number }}</td>
+      <td>{{ r.display_name }}</td>
+      <td>{{ r.external_id }}</td>
+      <td>{{ r.outcome }}</td>
+      <td>{{ r.qbo_id or "—" }}</td>
+      <td class="muted">{{ r.detail }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

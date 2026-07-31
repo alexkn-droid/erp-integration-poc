@@ -1,0 +1,4 @@
+external_id,display_name,company_name,email,phone,address_line1,address_line2,city,state,postal_code,country,currency,is_active
+,Riverside Bakery,Riverside Bakery LLC,ap@riverside-bakery.example,555-0101,12 River St,,Springfield,IL,62701,US,USD,true
+,Northgate Consulting,,billing@northgate.example,555-0102,,,,,,,USD,true
+cust-external-003,Copper Kettle Cafe,Copper Kettle LLC,hello@copperkettle.example,555-0103,88 Main St,Suite 4,Austin,TX,73301,US,USD,false

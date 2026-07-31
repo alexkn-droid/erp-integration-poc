@@ -1,0 +1,141 @@
+:root {
+  --border: #d7dbe0;
+  --bg: #f7f8fa;
+  --text: #1a1d21;
+  --muted: #5b6470;
+  --accent: #2d6cdf;
+  --danger: #b3261e;
+  --success: #1e7a34;
+  --warn: #8a5a00;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+a { color: var(--accent); }
+
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+}
+.topbar-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.brand { font-weight: 600; text-decoration: none; color: var(--text); }
+.badge {
+  font-size: 11px;
+  background: var(--warn);
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+nav { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+nav a { text-decoration: none; color: var(--text); font-size: 14px; }
+nav a:hover { color: var(--accent); }
+
+.logout-form { display: inline; }
+.link-button {
+  background: none; border: none; padding: 0; font: inherit; color: var(--text);
+  cursor: pointer; font-size: 14px;
+}
+.link-button:hover { color: var(--accent); }
+
+.container { max-width: 1000px; margin: 0 auto; padding: 24px 20px 60px; }
+
+h1 { font-size: 22px; }
+h2 { font-size: 18px; margin-top: 28px; }
+
+.flash {
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 18px;
+  font-size: 14px;
+}
+.flash-success { background: #e6f4ea; color: var(--success); border: 1px solid #b7dfc2; }
+.flash-error { background: #fbe9e7; color: var(--danger); border: 1px solid #f2c1bc; }
+.flash-warning { background: #fff6e0; color: var(--warn); border: 1px solid #f0dca0; }
+
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+}
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+tr:hover td { background: #fafbfc; }
+
+form.stacked label { display: block; margin: 12px 0 4px; font-size: 13px; color: var(--muted); }
+form.stacked input[type=text],
+form.stacked input[type=email],
+form.stacked input[type=password],
+form.stacked input[type=file],
+form.stacked select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+}
+form.stacked .checkbox-row { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+form.stacked .checkbox-row input { width: auto; }
+form.stacked .row { display: flex; gap: 16px; }
+form.stacked .row > div { flex: 1; }
+
+.actions { margin-top: 20px; display: flex; gap: 10px; }
+
+button, .btn {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 9px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+}
+button.secondary, .btn.secondary {
+  background: #fff;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+button.danger, .btn.danger { background: var(--danger); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.status-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.status-connected { background: #e6f4ea; color: var(--success); }
+.status-disconnected { background: #fbe9e7; color: var(--danger); }
+
+.muted { color: var(--muted); font-size: 13px; }
+.kv { font-size: 14px; }
+.kv dt { color: var(--muted); font-size: 12px; text-transform: uppercase; margin-top: 10px; }
+.kv dd { margin: 2px 0 0; }
+
+.error-list { color: var(--danger); font-size: 13px; margin: 4px 0 0; padding-left: 18px; }
+.dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@media (max-width: 700px) { .dashboard-grid { grid-template-columns: 1fr; } .row { flex-direction: column; } }

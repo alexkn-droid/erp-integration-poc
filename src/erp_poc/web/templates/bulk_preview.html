@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Bulk upload preview{% endblock %}
+{% block content %}
+<h1>Preview: {{ job.filename }}</h1>
+
+<div class="card">
+  <p><strong>{{ valid_count }}</strong> row(s) look valid and ready to send to QuickBooks as {{ label.lower() }}s.
+     {% if invalid_count %}<strong>{{ invalid_count }}</strong> row(s) have errors and will be skipped.{% endif %}</p>
+
+  {% if valid_count > 0 %}
+  <form method="post" action="/bulk-upload/{{ job.id }}/confirm">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="actions" style="margin-top:0">
+      <button type="submit">Confirm and process {{ valid_count }} row(s)</button>
+      <a class="btn secondary" href="/bulk-upload">Cancel, upload a different file</a>
+    </div>
+  </form>
+  {% else %}
+  <p class="muted">No valid rows to process.</p>
+  <a class="btn secondary" href="/bulk-upload">Upload a different file</a>
+  {% endif %}
+</div>
+
+<div class="card">
+  <table>
+    <tr><th>Row</th><th>Display name</th><th>External ID</th><th>Status</th></tr>
+    {% for row in job.rows_json %}
+    <tr>
+      <td>{{ row.row_number }}</td>
+      <td>{{ row.display_name }}</td>
+      <td>{{ row.external_id or "—" }}</td>
+      <td>
+        {% if row.errors %}
+          <span class="status-pill status-disconnected">Invalid</span>
+          <ul class="error-list">{% for e in row.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% else %}
+          <span class="status-pill status-connected">Valid</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

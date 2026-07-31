@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Confirm {{ label.lower() }}{% endblock %}
+{% block content %}
+<h1>Review before sending to QuickBooks</h1>
+<p class="muted">Nothing has been sent to QuickBooks yet. Check the values below, then confirm.</p>
+
+<div class="card">
+  <dl class="kv">
+    <dt>External ID</dt><dd>{{ party.external_id }}</dd>
+    <dt>Display name</dt><dd>{{ party.display_name }}</dd>
+    <dt>Company name</dt><dd>{{ party.company_name or "—" }}</dd>
+    <dt>Email</dt><dd>{{ party.email or "—" }}</dd>
+    <dt>Phone</dt><dd>{{ party.phone or "—" }}</dd>
+    <dt>Billing address</dt>
+    <dd>
+      {% if party.billing_address %}
+        {{ party.billing_address.line1 or "" }} {{ party.billing_address.line2 or "" }}<br>
+        {{ party.billing_address.city or "" }} {{ party.billing_address.state or "" }} {{ party.billing_address.postal_code or "" }}<br>
+        {{ party.billing_address.country or "" }}
+      {% else %}—{% endif %}
+    </dd>
+    <dt>Currency</dt><dd>{{ party.currency }}</dd>
+    <dt>Active</dt><dd>{{ "Yes" if party.is_active else "No" }}</dd>
+  </dl>
+</div>
+
+<form method="post" action="{{ url_prefix }}/{{ 'new' if mode == 'create' else erp_id ~ '/edit' }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <input type="hidden" name="confirm" value="yes">
+  {% for field in ["external_id","display_name","company_name","email","phone","address_line1","address_line2","city","state","postal_code","country","currency"] %}
+  <input type="hidden" name="{{ field }}" value="{{ form.get(field, '') }}">
+  {% endfor %}
+  {% if form.get("is_active") == "on" %}<input type="hidden" name="is_active" value="on">{% endif %}
+
+  <div class="actions">
+    <button type="submit">{{ "Create in QuickBooks" if mode == "create" else "Save changes to QuickBooks" }}</button>
+    <a class="btn secondary" href="{{ url_prefix }}/{{ 'new' if mode == 'create' else erp_id ~ '/edit' }}">Back and edit</a>
+  </div>
+</form>
+{% endblock %}

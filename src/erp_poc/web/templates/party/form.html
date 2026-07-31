@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{{ "New" if mode == "create" else "Edit" }} {{ label }}{% endblock %}
+{% block content %}
+<h1>{{ "New" if mode == "create" else "Edit" }} {{ label }}</h1>
+
+{% if errors %}
+<div class="card" style="border-color:#f2c1bc">
+  <strong>Please fix the following:</strong>
+  <ul class="error-list">
+    {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<form method="post" action="{{ url_prefix }}/{{ 'new' if mode == 'create' else erp_id ~ '/edit' }}" class="stacked card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+  <label for="external_id">External ID</label>
+  <input type="text" id="external_id" name="external_id" value="{{ form_values.get('external_id', '') }}"
+         {{ 'readonly' if mode == 'edit' else '' }}>
+  <p class="muted" style="margin:4px 0 0">
+    {% if mode == "create" %}Generated automatically — you can override it if this record should match an ID from another system.
+    {% else %}Set when this record was first created; not editable.{% endif %}
+  </p>
+
+  <label for="display_name">Display name *</label>
+  <input type="text" id="display_name" name="display_name" value="{{ form_values.get('display_name', '') }}" required maxlength="100">
+
+  <label for="company_name">Company name</label>
+  <input type="text" id="company_name" name="company_name" value="{{ form_values.get('company_name', '') }}" maxlength="100">
+
+  <div class="row">
+    <div>
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" value="{{ form_values.get('email', '') }}">
+    </div>
+    <div>
+      <label for="phone">Phone</label>
+      <input type="text" id="phone" name="phone" value="{{ form_values.get('phone', '') }}" maxlength="30">
+    </div>
+  </div>
+
+  <label for="address_line1">Address line 1</label>
+  <input type="text" id="address_line1" name="address_line1" value="{{ form_values.get('address_line1', '') }}">
+
+  <label for="address_line2">Address line 2</label>
+  <input type="text" id="address_line2" name="address_line2" value="{{ form_values.get('address_line2', '') }}">
+
+  <div class="row">
+    <div>
+      <label for="city">City</label>
+      <input type="text" id="city" name="city" value="{{ form_values.get('city', '') }}">
+    </div>
+    <div>
+      <label for="state">State / province</label>
+      <input type="text" id="state" name="state" value="{{ form_values.get('state', '') }}">
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <label for="postal_code">Postal code</label>
+      <input type="text" id="postal_code" name="postal_code" value="{{ form_values.get('postal_code', '') }}">
+    </div>
+    <div>
+      <label for="country">Country</label>
+      <input type="text" id="country" name="country" value="{{ form_values.get('country', '') }}">
+    </div>
+  </div>
+
+  <label for="currency">Currency</label>
+  <input type="text" id="currency" name="currency" value="{{ form_values.get('currency', 'USD') }}" maxlength="3" style="max-width:100px">
+
+  <div class="checkbox-row">
+    <input type="checkbox" id="is_active" name="is_active" {{ 'checked' if form_values.get('is_active') == 'on' else '' }}>
+    <label for="is_active" style="margin:0">Active</label>
+  </div>
+
+  <div class="actions">
+    <button type="submit">Review and continue</button>
+    <a class="btn secondary" href="{{ url_prefix }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}
