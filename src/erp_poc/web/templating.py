@@ -22,7 +22,10 @@ def render(
 ):
     ctx = {
         "csrf_token": (session or {}).get("csrf_token", ""),
-        "logged_in": bool(session),
+        # bool(session) would be True even for the pre-auth
+        # {"authenticated": False, ...} session /login issues purely to
+        # CSRF-protect its own form — that's not "logged in".
+        "logged_in": bool(session and session.get("authenticated")),
         "flash_message": request.query_params.get("msg"),
         "flash_level": request.query_params.get("level", "success"),
         **context,

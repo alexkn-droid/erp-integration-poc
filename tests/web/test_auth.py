@@ -21,6 +21,17 @@ def test_login_page_renders_without_auth(client):
     assert "Shared password" in r.text or "password" in r.text.lower()
 
 
+def test_login_page_does_not_show_authenticated_navigation(client):
+    """Regression test: /login issues an unauthenticated {"authenticated": False, ...}
+    session purely to CSRF-protect its own form. That session dict is
+    truthy, so a naive `bool(session)` check would incorrectly show the
+    logged-in nav bar (and a working Logout button) before login."""
+    r = client.get("/login")
+    assert r.status_code == 200
+    assert "Dashboard</a>" not in r.text
+    assert 'action="/logout"' not in r.text
+
+
 def test_wrong_password_rejected(client):
     r = client.get("/login")
     csrf = extract_csrf(r.text)
