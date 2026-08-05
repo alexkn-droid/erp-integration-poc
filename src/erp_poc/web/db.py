@@ -16,7 +16,22 @@ class Base(DeclarativeBase):
     pass
 
 
+def _normalize_database_url(database_url: str) -> str:
+    """Render (like Heroku before it) hands out `postgres://` or
+    `postgresql://` connection strings, which SQLAlchemy resolves to the
+    psycopg2 dialect by default. This app installs psycopg (v3) instead,
+    so the URL needs to say so explicitly — otherwise engine creation
+    fails at startup with a missing-driver error before the app ever
+    binds a port."""
+    if database_url.startswith("postgres://"):
+        return "postgresql+psycopg://" + database_url[len("postgres://") :]
+    if database_url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + database_url[len("postgresql://") :]
+    return database_url
+
+
 def make_engine(database_url: str):
+    database_url = _normalize_database_url(database_url)
     if database_url.startswith("sqlite"):
         # check_same_thread=False: FastAPI runs sync route handlers in a
         # worker thread pool, so the connection may be used from a

@@ -18,7 +18,7 @@ from sqlalchemy import engine_from_config, pool
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from erp_poc.web.config import get_web_settings  # noqa: E402
-from erp_poc.web.db import Base  # noqa: E402
+from erp_poc.web.db import Base, _normalize_database_url  # noqa: E402
 from erp_poc.web import models_db  # noqa: E402,F401 — import registers all tables on Base.metadata
 
 config = context.config
@@ -30,7 +30,10 @@ target_metadata = Base.metadata
 
 
 def _database_url() -> str:
-    return get_web_settings().database_url
+    # Same normalization make_engine() applies (postgres:// -> postgresql+psycopg://) —
+    # alembic builds its own engine here rather than calling make_engine(), so it needs
+    # this explicitly too, and it runs before the app itself does.
+    return _normalize_database_url(get_web_settings().database_url)
 
 
 def run_migrations_offline() -> None:
