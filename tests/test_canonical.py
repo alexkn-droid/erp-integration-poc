@@ -23,9 +23,19 @@ def test_display_name_whitespace_only_rejected():
         CanonicalCustomer(external_id="ext-1", display_name="   ")
 
 
-def test_invalid_email_rejected():
+def test_email_is_not_strictly_format_validated():
+    """Deliberate: QBO's own data doesn't enforce RFC email format either — a
+    live sandbox company's seeded sample data has a Vendor with two
+    comma-separated addresses in this field, which QBO accepts. Enforcing a
+    stricter rule than the ERP itself crashes when reading QBO's own real
+    data back (this was an actual production bug, not a hypothetical)."""
+    c = CanonicalCustomer(external_id="ext-1", display_name="Acme", email="a@x.com, b@x.com")
+    assert c.email == "a@x.com, b@x.com"
+
+
+def test_email_still_respects_max_length():
     with pytest.raises(ValidationError):
-        CanonicalCustomer(external_id="ext-1", display_name="Acme", email="not-an-email")
+        CanonicalCustomer(external_id="ext-1", display_name="Acme", email="x" * 201)
 
 
 def test_currency_normalized_to_uppercase():

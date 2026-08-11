@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class CanonicalAddress(BaseModel):
@@ -45,7 +45,14 @@ class CanonicalParty(BaseModel):
     external_id: str = Field(..., min_length=1, description="Our system's stable ID for this record")
     display_name: str = Field(..., min_length=1, max_length=100)
     company_name: Optional[str] = Field(default=None, max_length=100)
-    email: Optional[EmailStr] = None
+    # Deliberately NOT strict RFC email validation (no EmailStr): QBO's own
+    # data doesn't enforce it either — a live sandbox company's seeded
+    # sample data has a Vendor with "a@x.com, b@x.com" (two comma-separated
+    # addresses) in this exact field, which QBO accepts. Enforcing a
+    # stricter rule than the ERP itself just means reading back QBO's own
+    # real data can crash. Matching QBO's actual behavior, not an idealized
+    # spec of it.
+    email: Optional[str] = Field(default=None, max_length=200)
     phone: Optional[str] = Field(default=None, max_length=30)
     billing_address: Optional[CanonicalAddress] = None
     currency: str = Field(default="USD", min_length=3, max_length=3)
