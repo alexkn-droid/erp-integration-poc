@@ -55,6 +55,7 @@ local database directly from the CLI's already-authorized token rather than
 performing that OAuth handshake, because it cannot operate a browser.
 That one interactive step is the first thing a human should verify, either
 locally or after deployment (`docs/deployment.md`'s smoke test covers it).
+**Update: both of these are now done — see section 0b below.**
 
 **Remaining invoice work:** deliberately deferred, not attempted. Invoices
 are a structurally different problem (nested line items, product/service
@@ -69,6 +70,57 @@ tokens stored unencrypted in the database, single globally-shared QBO
 connection, free-tier Postgres' 30-day expiry, sandbox-only enforcement).
 None are hard to address later; all are out of scope for an intern PoC and
 called out explicitly rather than silently accepted.
+
+## 0b. Session 3 update — deployment and live smoke test (2026-08-03 to 2026-08-17)
+
+**Deployed sandbox validation — now fully done.** The app is live at the
+hosted URL in `README.md`, backed by a real Render Postgres database. A
+human completed every step that genuinely required a human — GitHub and
+Render account creation, entering secrets directly into Render's dashboard
+(never into chat), and the actual browser click-through of "Connect
+QuickBooks" against the real Intuit login/consent screen. That last step
+is the one piece of the whole project that could not have been verified by
+the AI alone, no matter how much of the rest it automated — a concrete,
+literal answer to "what does a human still have to do."
+
+**Three real bugs were found this session, all only visible once a human
+was actually driving the deployed app** — none had shown up in the 85
+automated (mocked) tests:
+
+1. **Database driver mismatch**: Render's Postgres connection string uses
+   `postgres://`, but the installed driver (`psycopg` v3) needs
+   `postgresql+psycopg://` explicitly — this crashed `alembic upgrade
+   head`, the very first thing the app's start command runs, before it
+   ever bound a port. Fixed by normalizing the URL in code, at both the
+   app's own engine and Alembic's migration runner.
+2. **Login page UI bug**: `bool(session)` was used as a proxy for "is this
+   user logged in," but the *unauthenticated* session `/login` creates
+   purely to CSRF-protect its own form is a non-empty dict — also
+   truthy. Logged-out visitors briefly saw the full authenticated nav bar
+   and a working Logout button on the login page itself.
+3. **Data-shape assumption broken by real data**: strict RFC email
+   validation (`EmailStr`) crashed the entire Vendors list page once it
+   hit a real seeded QBO sandbox record with two comma-separated
+   addresses in one email field — valid to QBO, invalid to our stricter
+   rule. This had been logged as an open, undecided question in session
+   2's `docs/human_intervention_log.md`; a live crash settled it in favor
+   of matching QBO's own (looser) behavior rather than an idealized spec
+   of it.
+
+None of these were hypothetical risks flagged in the abstract — each was
+found from an actual Render deploy log or an actual broken page a human
+was looking at, then fixed and re-verified live. This is arguably the most
+concrete evidence in this whole report for the central question: the AI
+could diagnose and fix each one from a pasted log/error in minutes, but
+**could not have found any of them without a human actually operating the
+deployed system** — the two are complementary, not substitutes for each
+other.
+
+Full smoke test executed and passing on the live deployed app: login →
+QuickBooks connection (real OAuth) → customer create/search/view/update →
+duplicate detection → vendor create → activity history → bulk CSV upload
+(mixed valid/invalid rows, processed correctly). See
+`docs/human_intervention_log.md` Session 3 for the complete, dated record.
 
 ---
 

@@ -40,18 +40,41 @@ validation had occurred; the audit log settled it.
 | 15 | Vendor field-mapping assumption (Customer-identical shape) | **Confirmed live**, not just assumed | Session 1's REPORT.md flagged NetSuite/Vendor mapping details as unverified secondary-source claims. This session's live vendor create (QBO ID 62) confirms the QBO Vendor entity does in fact mirror Customer's field shape — upgrading that from "assumed" to "confirmed." |
 | 16 | Sandbox-only write enforcement for the web app | AI caught its own gap | The CLI has always refused writes outside `QBO_ENVIRONMENT=sandbox`; the AI initially built the web app *without* the equivalent guard, caught it before writing tests, and added `require_sandbox_environment` (enforced at every write route, tested in `tests/web/test_customers.py` and `test_bulk_upload.py`). Noting the miss, not just the fix. |
 
+## Session 3 — 2026-08-03 to 2026-08-17: Deployment and live smoke test
+
+The human created a GitHub account and a Render account (both genuinely
+required — the AI cannot create third-party accounts), pushed the repo,
+and drove the entire deployment through Render's Blueprint flow, entering
+all secrets directly into Render's dashboard rather than sharing them in
+chat. The AI diagnosed and fixed three real bugs found only because a real
+human clicked through the actual deployed site — none of these surfaced in
+the 85 automated tests, which is itself a useful data point about the
+limits of mocked-API testing.
+
+| # | Decision / action | Who | Notes |
+|---|---|---|---|
+| 17 | Create GitHub + Render accounts, push the repo, complete Render's Blueprint setup | **Human required, done** | Including recovering a forgotten Render password and a forgotten app shared-password — both handled by the human via each service's own recovery/reset flow, not by the AI. |
+| 18 | Fix: `DATABASE_URL` scheme mismatch (`postgres://` vs the `psycopg` v3 driver's required `postgresql+psycopg://`) | AI, autonomous — caught from a Render deploy log the human pasted | This is exactly the kind of environment-specific failure that never shows up in local SQLite-backed tests; only surfaced once actually deployed against Render's Postgres. |
+| 19 | Fix: `/login` page incorrectly showed the authenticated nav bar + working Logout button to logged-out visitors | AI, self-caught by inspecting the live page's HTML, not reported by the human | `bool(session)` was true even for the pre-auth, `authenticated: False` session `/login` issues to CSRF-protect its own form. Added a regression test. |
+| 20 | Complete the actual browser "Connect QuickBooks" OAuth click-through | **Human required, done** | The one step flagged in session 2 as never verified by a real browser. Required a real fix along the way (item 21) before it worked. |
+| 21 | Fix: OAuth redirect_uri registered on the wrong Intuit app | Human diagnosed with AI guidance, human fixed in Intuit's dashboard | The human has multiple Intuit apps; Render's `QBO_CLIENT_ID`/`SECRET` pointed at a different one ("ERP Test") than the one with the redirect URI registered. Diagnosed by comparing the `client_id` in the actual failing OAuth URL against `.env` — the AI compared them programmatically without printing either value into chat. |
+| 22 | Fix: strict email format validation crashed the live Vendors page | AI, autonomous, from a Render log traceback the human pasted | QBO's own seeded sandbox sample data has a Vendor with two comma-separated addresses in one email field — valid to QBO, rejected by our `EmailStr` field. This was flagged as an *open, undecided question* in session 2's log; a real production-like crash resolved it in favor of matching QBO's own leniency. Directly analogous to the "documentation gaps" the original REPORT.md Phase 3 flagged — QBO's actual data behavior kept being looser than assumed. |
+| 23 | Full manual smoke test on the live deployed app (login, connect, customer CRUD, vendor create, activity history, bulk CSV upload) | Human executed, AI guided step by step and diagnosed each failure | All steps eventually passed; two of the CSV upload's apparent "failures" during testing turned out to be a malformed test fixture file the AI itself had generated (an off-by-one missing CSV column), not an app bug — worth noting as a reminder that test data errors can look identical to product bugs from the outside. |
+
 ## Open items requiring a human
 
 - [x] Create Intuit Developer account + sandbox company (item 4) — done 2026-07-29 or earlier
 - [x] Populate `.env` with real Client ID/Secret (item 5) — done
 - [x] Run the CLI's OAuth consent flow (item 6) — done
 - [x] Execute a live create against the sandbox — done via CLI (2026-07-29) and via the web app (2026-07-31)
-- [ ] Review `transform_qbo.py` field mappings against the live API reference (Customer confirmed live; Vendor confirmed live in session 2; still worth a pass against the primary docs for edge cases like multi-currency)
-- [ ] Decide whether `email-validator`'s strict RFC validation is desired, or whether QBO's own (looser) email acceptance should be mirrored instead. Still open — not revisited this session.
-- [ ] **Complete the browser OAuth consent flow through the actual "Connect QuickBooks" button** (local or hosted) — the one part of the web app never driven by a real browser click in this session. Should be the first thing checked in `docs/deployment.md`'s smoke test.
-- [ ] Create a GitHub account (item 13) and push this repo (see `docs/deployment.md` step 1)
-- [ ] Create a Render account and complete the Blueprint deploy (`docs/deployment.md` steps 2–4)
+- [x] **Complete the browser OAuth consent flow through the actual "Connect QuickBooks" button** — done 2026-08-11, after fixing item 21 above
+- [x] Create a GitHub account (item 13) and push this repo — done
+- [x] Create a Render account and complete the Blueprint deploy — done; live at the URL in README.md
+- [x] Full manual smoke test on the deployed app — done 2026-08-17, all steps passing
+- [ ] Review `transform_qbo.py` field mappings against the live API reference (Customer and Vendor both confirmed live; still worth a pass against the primary docs for edge cases like multi-currency)
 - [ ] Confirm the shared sandbox company has at least one QBO Item before scoping invoice work (`docs/invoice_phase2.md`)
+- [ ] Consider revoking/rotating the GitHub personal access token used during setup — it was typed into a local Terminal several times over the course of deployment; never committed or shared in chat, but rotating it is good hygiene given how much handling it got
+- [ ] Decide on a longer-term secret-storage story before this app handles anything beyond disposable sandbox data (see README "Security limitations" — tokens are still stored as plain database columns)
 
 ## Template for future entries
 

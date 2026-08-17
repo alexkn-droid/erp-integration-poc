@@ -5,13 +5,13 @@ Two ways to use this: a **CLI** (original PoC, sandbox-validated) and a
 write-up (research, design, evaluation, feasibility) is in
 [`REPORT.md`](REPORT.md).
 
-**Status:** Both the CLI and the web app have been run against a real
-QuickBooks Online sandbox company (not just mocked tests) — see
-`docs/human_intervention_log.md` for exactly what was verified and when.
-The one thing genuinely *not* verified end-to-end is the web app's browser
-OAuth consent screen itself (Connect QuickBooks → Intuit login → redirect
-back) — an AI assistant cannot click through a browser login, so that one
-step needs a human to confirm once, locally or after deployment.
+**Status: deployed and live.** The web app is running at
+https://erp-poc-web.onrender.com. Both the CLI and the web app have been
+run end-to-end against a real QuickBooks Online sandbox company — including
+the browser OAuth consent screen itself (Connect QuickBooks → Intuit login
+→ redirect back), which needed a human to click through since an AI
+assistant can't operate a browser. See `docs/human_intervention_log.md`
+for the full, dated record of what was verified, when, and by whom.
 
 ## Requirements
 
@@ -32,8 +32,11 @@ pip install -e ".[dev]"
 pytest -q
 ```
 
-Everything runs offline against mocked QBO responses — 79 tests (34 CLI +
-45 web) pass as of this writing.
+Everything runs offline against mocked QBO responses — 85 tests pass as of
+this writing. The app has also been deployed and live-tested end to end
+against a real QBO sandbox; see `docs/human_intervention_log.md` Session 3
+for the full record, including three real bugs found only once a human was
+actually driving the deployed app (mocked tests alone didn't catch them).
 
 ## Part 1 — CLI
 
@@ -96,6 +99,10 @@ needs first).
 
 ### Deployment (Render)
 
+**Already deployed** at https://erp-poc-web.onrender.com. The steps below
+are what it took to get there and are what you'd repeat for a fresh
+instance — kept as reference, not a pending to-do.
+
 **Why Render over Railway:** Render has a genuine, permanent free web-service
 tier and a managed Postgres with automated backups; Railway no longer offers
 a real free tier (a one-time trial credit, then a required payment method)
@@ -124,6 +131,12 @@ phase.
 5. Redeploy (env var changes trigger this automatically on Render). Log in,
    connect QuickBooks, and run through the smoke test in
    `docs/deployment.md`.
+
+**Gotcha we actually hit:** if you have more than one app registered in the
+Intuit Developer dashboard, the redirect URI must be added to the *same*
+app whose Client ID/Secret you put in Render — not a different one.
+Mismatching them produces a generic "there's a connection problem" error
+on Intuit's side that doesn't name the actual cause.
 
 Full step-by-step (including the exact points where Render needs you to
 sign in) is in `docs/deployment.md`.
